@@ -28,7 +28,7 @@ credit-system/
 │   ├── config.py          # Configurações do sistema
 │   ├── database.py        # Conexão com o banco de dados
 │   ├── models.py          # Modelos do banco de dados
-│   ├── schemas.py         # Esquemas Pydantic
+│   ├── schema.py         # Esquemas Pydantic
 │   ├── auth.py            # Utilitários de autenticação
 │   └── routers/           # Endpoints da API
 │       ├── __init__.py
@@ -95,14 +95,27 @@ source .venv/bin/activate  # Linux/MacOS
 pip install -r requirements.txt
 ```
 
-4. Configure as variáveis de ambiente necessárias:
+## Variáveis de Ambiente
+
+Antes de rodar a aplicação, defina as seguintes variáveis de ambiente:
+
+| Variável       | Descrição                                      |
+| -------------- | ---------------------------------------------- |
+| `DATABASE_URL` | URL de conexão com o banco de dados PostgreSQL |
+| `SECRET_KEY`   | Chave secreta usada para assinar os tokens JWT |
+
+Exemplo:
 
 ```bash
 export DATABASE_URL="postgresql://seu_usuario:sua_senha@localhost/credit_db"
 export SECRET_KEY="sua_chave_secreta"
 ```
 
-5. Execute a aplicação:
+No Windows (cmd), use `set` em vez de `export`.
+
+## Executando a Aplicação
+
+Rode o servidor de desenvolvimento:
 
 ```bash
 python -m uvicorn app.main:app --reload
@@ -114,9 +127,9 @@ A API estará disponível em `http://localhost:8000`
 
 ### Autenticação
 
--   `POST /register`: Registra um novo usuário
--   `POST /login`: Autentica e obtém token de acesso
--   `POST /logout`: Invalida sessão (client-side)
+-   `POST /register`: Registra um novo usuário (requer CPF, Nome, Data de Nascimento, Email e Senha)
+-   `POST /login`: Autentica com CPF e Senha, retorna token de acesso
+-   `POST /logout`: Invalida sessão (apenas client-side, não há blacklist de tokens)
 
 ### Gerenciamento de Dívidas
 
@@ -130,13 +143,19 @@ A API estará disponível em `http://localhost:8000`
 ## Testando a API
 
 1. Acesse a documentação interativa em `http://localhost:8000/docs`
-2. Registre um usuário através do endpoint `/register`
-3. Faça login com as credenciais no endpoint `/login` para obter um token
+2. Registre um usuário através do endpoint `/register` fornecendo:
+    - CPF
+    - Nome
+    - Data de Nascimento
+    - Email
+    - Senha
+3. Faça login com CPF e Senha no endpoint `/login` para obter um token
 4. Clique no botão "Authorize" no topo da página e insira o token no formato `Bearer seu_token_aqui`
 5. Agora você pode testar os endpoints protegidos como `/debts` e `/score`
 
 ## Detalhes de Implementação
 
 -   Usuários com endereços de email de domínio específico (configurado no sistema) recebem automaticamente privilégios de administrador
--   O score de crédito é calculado usando a fórmula: 1000 / √(x + 100), onde x é o valor médio das dívidas
+-   O score de crédito é calculado usando a fórmula: √(1000 / x), onde x é o valor médio das dívidas
 -   A autenticação é realizada via tokens JWT com expiração de 30 minutos
+-   O endpoint de logout é apenas client-side, não existe blacklist de tokens no servidor

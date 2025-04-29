@@ -13,4 +13,4 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 # Admin domain for automatic admin role assignment
-ADMIN_DOMAIN = "@admin.example.com"
+ADMIN_DOMAIN = os.getenv("ADMIN_DOMAIN", "@admin.example.com")

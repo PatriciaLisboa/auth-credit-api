@@ -34,7 +34,7 @@ class DebtCreate(DebtBase):
     pass
 
 class DebtResponse(DebtBase):
-    id: str
+    id: uuid.UUID
 
     class Config:
         from_attributes = True
