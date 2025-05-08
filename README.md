@@ -17,6 +17,7 @@ Este projeto implementa um sistema de crédito simples com as seguintes funciona
 -   **PostgreSQL**: Banco de dados relacional
 -   **SQLAlchemy**: ORM para interações com o banco de dados
 -   **JWT**: Mecanismo de autenticação de usuários
+-   **Pydantic**: Validação de dados e serialização
 
 ## Estrutura do Projeto
 
@@ -28,7 +29,7 @@ credit-system/
 │   ├── config.py          # Configurações do sistema
 │   ├── database.py        # Conexão com o banco de dados
 │   ├── models.py          # Modelos do banco de dados
-│   ├── schema.py         # Esquemas Pydantic
+│   ├── schemas.py         # Esquemas Pydantic
 │   ├── auth.py            # Utilitários de autenticação
 │   └── routers/           # Endpoints da API
 │       ├── __init__.py
@@ -36,6 +37,7 @@ credit-system/
 │       ├── debts.py       # Gerenciamento de registros de dívidas
 │       └── score.py       # Cálculo de score de crédito
 ├── requirements.txt
+├── create_tables.py       # Script para criação das tabelas
 └── README.md
 ```
 
@@ -95,30 +97,26 @@ source .venv/bin/activate  # Linux/MacOS
 pip install -r requirements.txt
 ```
 
-## Variáveis de Ambiente
+4. Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
 
-Antes de rodar a aplicação, defina as seguintes variáveis de ambiente:
-
-| Variável       | Descrição                                      |
-| -------------- | ---------------------------------------------- |
-| `DATABASE_URL` | URL de conexão com o banco de dados PostgreSQL |
-| `SECRET_KEY`   | Chave secreta usada para assinar os tokens JWT |
-
-Exemplo:
-
-```bash
-export DATABASE_URL="postgresql://seu_usuario:sua_senha@localhost/credit_db"
-export SECRET_KEY="sua_chave_secreta"
+```env
+DATABASE_URL=postgresql://seu_usuario:sua_senha@localhost/credit_db
+SECRET_KEY=sua_chave_secreta
+ADMIN_DOMAIN=admin.com
 ```
 
-No Windows (cmd), use `set` em vez de `export`.
+5. Execute o script para criar as tabelas:
+
+```bash
+python create_tables.py
+```
 
 ## Executando a Aplicação
 
 Rode o servidor de desenvolvimento:
 
 ```bash
-python -m uvicorn app.main:app --reload
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 A API estará disponível em `http://localhost:8000`
@@ -134,7 +132,7 @@ A API estará disponível em `http://localhost:8000`
 ### Gerenciamento de Dívidas
 
 -   `GET /debts`: Lista dívidas do usuário autenticado
--   `POST /debts`: Cria uma nova dívida (somente admin)
+-   `POST /debts`: Cria uma nova dívida (requer autenticação)
 
 ### Score de Crédito
 
@@ -159,3 +157,5 @@ A API estará disponível em `http://localhost:8000`
 -   O score de crédito é calculado usando a fórmula: √(1000 / x), onde x é o valor médio das dívidas
 -   A autenticação é realizada via tokens JWT com expiração de 30 minutos
 -   O endpoint de logout é apenas client-side, não existe blacklist de tokens no servidor
+-   Validação de dados usando Pydantic para garantir integridade dos dados
+-   Documentação OpenAPI (Swagger) com esquemas de validação detalhados
